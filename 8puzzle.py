@@ -1,3 +1,5 @@
+from random import randint
+
 inputFile = "input.txt"
 myInput = open(inputFile, 'r')
 #oneLine = myInput.readline()   #reads one line at a time
@@ -43,6 +45,11 @@ def move(direction):
         print("Invalid move")
         return -1
 
+def printState():
+    strState = "".join(state)
+    strState = strState[:3] + " " + strState[3:6] + " " + strState[6:]
+    print(strState)
+
 for x in allLines:
     if "setState" in x:
         x = x.replace(" ", "")
@@ -55,5 +62,25 @@ for x in allLines:
         x = x.replace("\n", "")
         x = x.replace("move", "")
         i = move(x)
+    elif "printState" in x:
+        printState()
+    elif "randomizeState" in x:
+        x = x.replace(" ", "")
+        x = x.replace("\n", "")
+        x = x.replace("randomizeState", "")
+        n = int(x)
+        for i in range(n):
+            k = -1
+            while k == -1:
+                j = randint(1,4)
+                if j == 1:
+                    direction = "up"
+                elif j == 2:
+                    direction = "down"
+                elif j == 3:
+                    direction = "left"
+                else:
+                    direction = "right"
+                k = move(direction)
     else:
         print(x)
