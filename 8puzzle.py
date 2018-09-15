@@ -1,7 +1,9 @@
 import sys
 from random import randint
+from random import seed
 from queue import PriorityQueue
 
+seed(98765)
 #inputFile = "input.txt"
 inputFile = sys.argv[1]
 myInput = open(inputFile, 'r')
@@ -82,6 +84,22 @@ def numWrong(st):
             count = count + 1
     return count
 
+def availableMoves(st):
+    aMoves = []
+    u = move(st, "up")
+    if u != -1:
+        aMoves.append("up")
+    d = move(st, "down")
+    if d != -1:
+        aMoves.append("down")
+    l = move(st, "left")
+    if l != -1:
+        aMoves.append("left")
+    r = move(st, "right")
+    if r != -1:
+        aMoves.append("right")
+    return aMoves
+
 def Astar(st, h):
     gl = goal
     n = maxNodes
@@ -103,59 +121,28 @@ def Astar(st, h):
         if n == 0:
             fail = -1
             break
-        else:
-            n = n - 1
-            curr = prio.get()
-            if curr == gl:
-                break
-            u = move(curr, "up")
-            if u != -1:
-                myWeight = 1 + weight[curr]
-                if (u not in weight) or (myWeight < weight[u]):
-                    weight[u] = myWeight
-                    previous[u] = curr
-                    moveList[u] = "up"
-                    if h == 'h1':
-                        myDist = numWrong(u)
-                    elif h == 'h2':
-                        myDist = goalDist(u)
-                    prio.put(u, myWeight + myDist)
-            d = move(curr, "down")
-            if d != -1:
-                myWeight = 1 + weight[curr]
-                if (d not in weight) or (myWeight < weight[d]):
-                    weight[d] = myWeight
-                    previous[d] = curr
-                    moveList[d] = "down"
-                    if h == 'h1':
-                        myDist = numWrong(d)
-                    elif h == 'h2':
-                        myDist = goalDist(d)
-                    prio.put(d, myWeight + myDist)
-            l = move(curr, "left")
-            if l != -1:
-                myWeight = 1 + weight[curr]
-                if (l not in weight) or (myWeight < weight[l]):
-                    weight[l] = myWeight
-                    previous[l] = curr
-                    moveList[l] = "left"
-                    if h == 'h1':
-                        myDist = numWrong(l)
-                    elif h == 'h2':
-                        myDist = goalDist(l)
-                    prio.put(l, myWeight + myDist)
-            r = move(curr, "right")
-            if r != -1:
-                myWeight = 1 + weight[curr]
-                if (r not in weight) or (myWeight < weight[r]):
-                    weight[r] = myWeight
-                    previous[r] = curr
-                    moveList[r] = "right"
-                    if h == 'h1':
-                        myDist = numWrong(r)
-                    elif h == 'h2':
-                        myDist = goalDist(r)
-                    prio.put(r, myWeight + myDist)
+        n = n - 1
+        curr = prio.get()
+        if curr == gl:
+            break
+        aMoves = availableMoves(curr)
+        for x in aMoves:
+            newMove = move(curr, x)
+            myWeight = 1 + weight[curr]
+            #if myWeight < 10:
+                    #print("weight = " + str(myWeight) + x)
+                    #print("current = " + str(curr))
+            if (newMove not in weight) or (myWeight < weight[newMove]):
+                weight[newMove] = myWeight
+                previous[newMove] = curr
+                moveList[newMove] = x
+                if h == 'h1':
+                    myDist = numWrong(newMove)
+                elif h == 'h2':
+                    myDist = goalDist(newMove)
+                #if myWeight < 10:
+                    #print("weight = " + str(myWeight) + "priority = " + str((myWeight + myDist)) + x)
+                prio.put(newMove, myWeight + myDist)
     if fail == -1:
         print("Node limit reached, did not find goal")
     else:
@@ -164,6 +151,7 @@ def Astar(st, h):
         m = moveList[curr]
         moves = []
         while m != None:
+            #print(curr)
             moves.append(m)
             curr = previous[curr]
             if curr == None:
