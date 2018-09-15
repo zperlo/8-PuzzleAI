@@ -1,5 +1,4 @@
 setState 1b2 345 678
 printState
-maxNodes 9
-move down
-randomizeState 3
+solve A-star h1
+solve A-star h2
