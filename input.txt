@@ -1,2 +1,6 @@
 setState 1b2 345 678
+move down
+move up
+move left
+move left
 reandomizeState (n)
