@@ -1,5 +1,6 @@
 setState 1b2 345 678
 printState
+maxNodes 18400
 randomizeState 30
 printState
 solve A-star h2

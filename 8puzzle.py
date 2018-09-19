@@ -69,12 +69,13 @@ def printState():
 def goalDist(st):
     count = 0
     for x in st:
-        if (int(x) < 3 and st.index(x) < 3) or (int(x) >= 3 and int(x) < 6 and st.index(x) >= 3 and st.index(x) < 6) or (int(x) >= 6 and st.index(x) >= 6):
-            count = count + abs((int(x) % 3) - (st.index(x)%3))
-        elif (int(x) < 3 and st.index(x) >= 3 and st.index(x) < 6) or (int(x) >= 3 and int(x) < 6 and (st.index(x) < 3 or st.index(x) >= 6)) or (int(x) >= 6 and st.index(x) < 6 and st.index(x) >= 3):
-            count = count + abs((int(x) % 3) - (st.index(x)%3)) + 1
-        else:
-            count = count + abs((int(x) % 3) - (st.index(x)%3)) + 2
+        if int(x) != 0:
+            if (int(x) < 3 and st.index(x) < 3) or (int(x) >= 3 and int(x) < 6 and st.index(x) >= 3 and st.index(x) < 6) or (int(x) >= 6 and st.index(x) >= 6):
+                count = count + abs((int(x) % 3) - (st.index(x)%3))
+            elif (int(x) < 3 and st.index(x) >= 3 and st.index(x) < 6) or (int(x) >= 3 and int(x) < 6 and (st.index(x) < 3 or st.index(x) >= 6)) or (int(x) >= 6 and st.index(x) < 6 and st.index(x) >= 3):
+                count = count + abs((int(x) % 3) - (st.index(x)%3)) + 1
+            else:
+                count = count + abs((int(x) % 3) - (st.index(x)%3)) + 2
     return count
 
 def numWrong(st):
@@ -102,8 +103,8 @@ def availableMoves(st):
 
 def Astar(st, h):
     gl = goal
+    goalReached = 0
     n = maxNodes
-    fail = 0
     prio = PriorityQueue()
     if h == 'h1':
         currDist = numWrong(st)
@@ -119,11 +120,11 @@ def Astar(st, h):
     curr = None
     while not prio.empty():
         if n == 0:
-            fail = -1
             break
         n = n - 1
         curr = prio.get()
         if curr == gl:
+            goalReached = 1
             break
         aMoves = availableMoves(curr)
         for x in aMoves:
@@ -132,7 +133,7 @@ def Astar(st, h):
             #if myWeight < 10:
                     #print("weight = " + str(myWeight) + x)
                     #print("current = " + str(curr))
-            if (newMove not in weight) or (myWeight < weight[newMove]):
+            if ((newMove not in weight) or (myWeight < weight[newMove])) and (myWeight < 31): #and check shouldn't be necessary
                 weight[newMove] = myWeight
                 previous[newMove] = curr
                 moveList[newMove] = x
@@ -143,7 +144,7 @@ def Astar(st, h):
                 #if myWeight < 10:
                     #print("weight = " + str(myWeight) + "priority = " + str((myWeight + myDist)) + x)
                 prio.put(newMove, myWeight + myDist)
-    if fail == -1:
+    if goalReached == 0:
         print("Node limit reached, did not find goal")
     else:
         print("Number of moves: " + str(weight[curr]))
