@@ -110,7 +110,7 @@ def Astar(st, h):
         currDist = numWrong(st)
     elif h == 'h2':
         currDist = goalDist(st)
-    prio.put(st, currDist)
+    prio.put((currDist, st))
     weight = {}
     weight[st] = 0
     previous = {}
@@ -123,6 +123,7 @@ def Astar(st, h):
             break
         n = n - 1
         curr = prio.get()
+        curr = curr[1]
         if curr == gl:
             goalReached = 1
             break
@@ -130,10 +131,7 @@ def Astar(st, h):
         for x in aMoves:
             newMove = move(curr, x)
             myWeight = 1 + weight[curr]
-            #if myWeight < 10:
-                    #print("weight = " + str(myWeight) + x)
-                    #print("current = " + str(curr))
-            if ((newMove not in weight) or (myWeight < weight[newMove])) and (myWeight < 31): #and check shouldn't be necessary
+            if ((newMove not in weight) or (myWeight < weight[newMove])):
                 weight[newMove] = myWeight
                 previous[newMove] = curr
                 moveList[newMove] = x
@@ -141,9 +139,7 @@ def Astar(st, h):
                     myDist = numWrong(newMove)
                 elif h == 'h2':
                     myDist = goalDist(newMove)
-                #if myWeight < 10:
-                    #print("weight = " + str(myWeight) + "priority = " + str((myWeight + myDist)) + x)
-                prio.put(newMove, myWeight + myDist)
+                prio.put(((myWeight + myDist), newMove))
     if goalReached == 0:
         print("Node limit reached, did not find goal")
     else:
