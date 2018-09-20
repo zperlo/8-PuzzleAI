@@ -145,6 +145,60 @@ def Astar(st, h):
         moves.reverse()
         print(moves)
 
+def beam(st, k):
+    gl = goal
+    goalReached = 0
+    successors = PriorityQueue()
+    currDist = numWrong(st) + goalDist(st)
+    successors.put((currDist, st))
+    numMoves = {}
+    numMoves[st] = 0
+    previous = {}
+    previous[st] = None
+    moveList = {}
+    moveList[st] = "Start"
+    curr = None
+    while goalReached == 0:
+        j = 0
+        kStates = []
+        while (not successors.empty()) and j < k:
+            tempState = successors.get()
+            tempState = tempState[1]
+            kStates.insert(j, tempState)
+            j = j + 1
+        for myState in kStates:
+            if goalReached == 1:
+                break
+            aMoves = availableMoves(myState)
+            for direction in aMoves:
+                newMove = move(myState, direction)
+                myNumMoves = 1 + numMoves[myState]
+                if ((newMove not in numMoves) or (myNumMoves < numMoves[newMove])):
+                    numMoves[newMove] = myNumMoves
+                    previous[newMove] = myState
+                    moveList[newMove] = direction
+                    myDist = numWrong(newMove) + goalDist(newMove)
+                    successors.put((myDist, newMove))
+                    if newMove == gl:
+                        goalReached = 1
+                        curr = newMove
+                        break
+    if goalReached == 0:
+        print("Node limit reached, did not find goal")
+    else:
+        print("Number of moves: " + str(numMoves[curr]))
+        print("Moves:")
+        m = moveList[curr]
+        moves = []
+        while m != None:
+            moves.append(m)
+            curr = previous[curr]
+            if curr == None:
+                break
+            m = moveList[curr]
+        moves.reverse()
+        print(moves)
+
 for x in allLines:
     if "setState" in x:
         x = x.replace(" ", "")
@@ -189,5 +243,11 @@ for x in allLines:
         x = x.replace(" ", "")
         x = x.replace("\n", "")
         Astar(state, x)
+    elif "solve beam" in x:
+        x = x.replace("solve beam", "")
+        x = x.replace(" ", "")
+        x = x.replace("\n", "")
+        k = int(x)
+        beam(state, k)
     else:
         print("Invalid command:" + x)

@@ -3,9 +3,13 @@ printState
 solve A-star h1
 printState
 solve A-star h2
+printState
+solve beam 5
 maxNodes 18400
 randomizeState 30
 printState
 solve A-star h1
 printState
 solve A-star h2
+printState
+solve beam 5
