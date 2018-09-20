@@ -1,0 +1,26 @@
+Zach Perlo
+
+1. Code design:
+    As is likely obvious, I chose to write in python. I made the decision to store the state
+    as a tuple. Originally I was storing it as a list, but I wanted to use states as the 
+    keys for a few dictionaries. Since dictionaries need their keys to be immutable, I 
+    switched over to using a tuple. For example, the goal state is represented as
+    goal = ('0', '1', '2', '3', '4', '5', '6', '7', '8')
+
+    That was the main design choice made. For the rest I'll go in order.
+
+    First I used sys to recognize the input and then copy each line of the input file to 
+    a list, where each line (and thus each command) is a separate element of the list, so 
+    it's very easy to iterate over to make sure each commant is performed.
+
+    
+
+
+maxNodes 18
+randomizeState 30
+printState
+solve A-star h1
+printState
+solve A-star h2
+
+h1 fails but h2 doesn't (h2 fails at maxNodes = 9, much better)
