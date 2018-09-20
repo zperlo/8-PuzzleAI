@@ -4,10 +4,8 @@ from random import seed
 from queue import PriorityQueue
 
 seed(98765)
-#inputFile = "input.txt"
 inputFile = sys.argv[1]
 myInput = open(inputFile, 'r')
-#oneLine = myInput.readline()   #reads one line at a time
 allLines = myInput.readlines()  #reads each line to an array
 
 state = ('0', '1', '2', '3', '4', '5', '6', '7', '8')
@@ -18,46 +16,37 @@ def move(st, direction):
     x = st.index('0')
     if direction == "up":
         if x < 3:
-            #print("Invalid move")
             return -1
         else:
             temp = list(st)
             temp[x],temp[x-3] = temp[x-3],temp[x]
             new = tuple(temp)
-            #print(new)
             return new
     elif direction == "down":
         if x > 5:
-            #print("Invalid move")
             return -1
         else:
             temp = list(st)
             temp[x],temp[x+3] = temp[x+3],temp[x]
             new = tuple(temp)
-            #print(new)
             return new
     elif direction == "left":
         if x == 0 or x == 3 or x == 6:
-            #print("Invalid move")
             return -1
         else:
             temp = list(st)
             temp[x],temp[x-1] = temp[x-1],temp[x]
             new = tuple(temp)
-            #print(new)
             return new
     elif direction == "right":
         if x == 2 or x == 5 or x == 8:
-            #print("Invalid move")
             return -1
         else:
             temp = list(st)
             temp[x],temp[x+1] = temp[x+1],temp[x]
             new = tuple(temp)
-            #print(new)
             return new
     else:
-        #print("Invalid move")
         return -1
 
 def printState():
@@ -111,8 +100,8 @@ def Astar(st, h):
     elif h == 'h2':
         currDist = goalDist(st)
     prio.put((currDist, st))
-    weight = {}
-    weight[st] = 0
+    numMoves = {}
+    numMoves[st] = 0
     previous = {}
     previous[st] = None
     moveList = {}
@@ -130,25 +119,24 @@ def Astar(st, h):
         aMoves = availableMoves(curr)
         for x in aMoves:
             newMove = move(curr, x)
-            myWeight = 1 + weight[curr]
-            if ((newMove not in weight) or (myWeight < weight[newMove])):
-                weight[newMove] = myWeight
+            myNumMoves = 1 + numMoves[curr]
+            if ((newMove not in numMoves) or (myNumMoves < numMoves[newMove])):
+                numMoves[newMove] = myNumMoves
                 previous[newMove] = curr
                 moveList[newMove] = x
                 if h == 'h1':
                     myDist = numWrong(newMove)
                 elif h == 'h2':
                     myDist = goalDist(newMove)
-                prio.put(((myWeight + myDist), newMove))
+                prio.put(((myNumMoves + myDist), newMove))
     if goalReached == 0:
         print("Node limit reached, did not find goal")
     else:
-        print("Number of moves: " + str(weight[curr]))
+        print("Number of moves: " + str(numMoves[curr]))
         print("Moves:")
         m = moveList[curr]
         moves = []
         while m != None:
-            #print(curr)
             moves.append(m)
             curr = previous[curr]
             if curr == None:

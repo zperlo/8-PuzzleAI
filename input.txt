@@ -1,6 +1,11 @@
 setState 1b2 345 678
 printState
+solve A-star h1
+printState
+solve A-star h2
 maxNodes 18400
 randomizeState 30
+printState
+solve A-star h1
 printState
 solve A-star h2
