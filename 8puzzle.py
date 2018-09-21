@@ -193,21 +193,18 @@ def beam(st, k):
                         goalReached = 1
                         curr = newMove
                         break
-    if goalReached == 0:
-        print("Node limit reached, did not find goal")
-    else:
-        print("Number of moves: " + str(numMoves[curr]))
-        print("Moves:")
+    print("Number of moves: " + str(numMoves[curr]))
+    print("Moves:")
+    m = moveList[curr]
+    moves = []
+    while m != None:
+        moves.append(m)
+        curr = previous[curr]
+        if curr == None:
+            break
         m = moveList[curr]
-        moves = []
-        while m != None:
-            moves.append(m)
-            curr = previous[curr]
-            if curr == None:
-                break
-            m = moveList[curr]
-        moves.reverse()
-        print(moves)
+    moves.reverse()
+    print(moves)
 
 # section for interpreting all the text file commands
 for command in allLines:

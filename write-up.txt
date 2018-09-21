@@ -13,7 +13,194 @@ Zach Perlo
     a list, where each line (and thus each command) is a separate element of the list, so 
     it's very easy to iterate over to make sure each commant is performed.
 
-    
+    Then I set up the global variables (state, goal, maxNodes) and the seed for the random
+    generator so that tests could be replicated.
+
+    Next is the move function. This takes in a state and a direction and returns the state 
+    with the requested move if possible or -1 if impossible. Again, tuples are immutable 
+    so it returns a second state, not the input state changed. This is helpful later on.
+
+    printState takes in a state and prints it in the format that input states are given.
+    (ie "XXX XbX XXX") where each X is a number, b is the blank and can be in any position.
+
+    goalDist takes a state as input and returns the manhattan distance of that state from 
+    the goal state. It does this by going through and for each element, it checks if it is 
+    in the correct row. It adds nothing for correct row, +1 for one row away, and +2 for 
+    two rows away, buy checking cutoffs in the indexes (row 1 is between 0 and 2, row 2 
+    is between 3 and 5, and row 3 is between 6 and 8). Then it checks how many columns
+    the element is off by taking %3 of the current index and where it should be. This is 
+    the h2 heuristic from the book.
+
+    numWrong takes a state as input and returns the linear distance of that state from the 
+    goal. It does this by going through and for each element it checks if it is in the correct
+    position or not, and adds 1 for each element that is not in the correct position. This 
+    is the h1 heuristic from the book.
+
+    availableMoves takes in a state and checks which directions can be moved by going through
+    each of the four directions and calling move. If move does not return -1, then the move 
+    is valid, so the direction ("up", "down", etc.) is added to a list called aMoves, which 
+    is then returned.
+
+    Astar takes in an initial state and a heuristic (either "h1" or "h2") and prints out 
+    either the number of moves it took to find a solution, and a list of what direction 
+    each move was, or it prints that it could not find a solution with the given number of 
+    maximum nodes it could check. Astar has four main data structures: prio is the priority 
+    queue, which allows it to always choose the node to explore that has the lowest 
+    total f(n), where f is g + h, g is the number of moves, and h is the heuristic function.
+    numMoves is a dictionary that has each state we have seen as a key, and the lowest 
+    number of moves it takes to get to the state as a value. previous is a dictionary 
+    with each state we have seen as a key, and the state that moved to get to it in the 
+    lowest move path as the value. moveList is a dictionary that has each state we have 
+    seen as a key, and the direction that was moved to get to it as the value. numMoves 
+    helps calculate the f(n) value, and previous and moveList are so that we can backtrack
+    after the optimal solution is found.
+    First, we put the start state into each of the dictionaries, and the queue (choosing
+    which heuristic to use based on the input). curr is the current node we are examining.
+    While there are still states in the priority queue prio:
+        if we have reached the maximum number of nodes we can check:
+            break out of the while loop without setting goalReached to 1, so we know it failed
+        otherwise decrement n, the max number of nodes
+        pop the lowest priority state out of prio
+        curr = curr[1] is there because the state and priority are passed into the queue
+        as a tuple, so I need to get just the state and not the priority with it
+        if current is the goal:
+            set goalReached to 1 so it knows it succeeded
+            break out of the loop so it can print
+        otherwise, it is not the goal so we must add all its children to the queue
+        find all the available moves and store them in the list aMoves
+        for every move:
+            store the state from that move in newMove
+            calculate the number of moves from start it is, store that in myNumMoves
+            if the state is not already in numMoves, or if it is but the number of moves 
+            to get to it is higher in numMoves, then:
+                put the value of myNumMoves into numMoves for the state newMove
+                set its previous to curr, as that's the node it came from directly
+                set the direction in moveList to the direction moved to get to newMove
+                calculate the heuristic based on the value of h input
+                insert it into the priority queue with priority equal to 
+                the heuristic + the number of moves, which is the calculation of f(n)
+            otherwise it was already explored so you don't add it to the queue
+    thus when the while ends, it will have failed with goalReached = 0 or succeeded with 
+    goalReached = 1 and the curr state equal to the goal.
+    if it failed, print out that it failed
+    otherwise, print the number of moves by looking up current in numMoves
+        then iterate through the previous states to create the list of moves that it took
+        to find the goal. You have to reverse this list to get the order the moves were 
+        taken in, and then it prints these out.
+
+    beam takes in an initial state and a k value (how many states to store at once) and 
+    prints out the number of moves it took to find a solution and a list of what direction 
+    each move was. beam has four main data structures: successors is a priority queue 
+    that stores all the successors for each set of states we check. It stores them by 
+    priotity of an evaluation function, which I chose to be h1 + h2 as they are both 
+    admissible, so that we can easily take the k best. numMoves is a dictionary that
+    has each state we have seen as a key, and the lowest number of moves it takes 
+    to get to the state as a value. previous is a dictionary with each state we 
+    have seen as a key, and the state that moved to get to it in the lowest move path 
+    as the value. moveList is a dictionary that has each state we have seen as a key, 
+    and the direction that was moved to get to it as the value. numMoves helps 
+    track how many moves it took, and previous and moveList are so that we can backtrack
+    after the optimal solution is found.
+    First, we put the start state into each of the dictionaries, and the queue (calculating 
+    the evaluation function of h1+h2). curr is just for keeping track of the end state for 
+    ease of printing after the algorithm runs.
+    While the goal has not been reached:
+        we set a number j to 0, and empty the list kStates
+        then, while successors still has states and we have iterated less than k times:
+            use a temp to insert the state at index j to kStates then increment j 
+        thus kStates will have k or fewer states, depending on how many states were in successors 
+        for every state in kStates:
+            if we already found the goal, don't check any more
+            otherwise find all the available moves and store them in the list aMoves
+            for every move:
+                store the state from that move in newMove
+                calculate the number of moves from start it is, store that in myNumMoves
+                if the state is not already in numMoves, or if it is but the number of moves 
+                to get to it is higher in numMoves, then:
+                    put the value of myNumMoves into numMoves for the state newMove
+                    set its previous to curr, as that's the node it came from directly
+                    set the direction in moveList to the direction moved to get to newMove
+                    calculate the evaluation function as h1 + h2 for the state
+                    insert it into the priority queue with priority equal to 
+                    the evaluation function
+                    if the state is the goal, set goalReached to 1 so that we know we 
+                    succeeded, and then set curr to the current state so we can print 
+                    and break from the loop, which will break out of all loops with the 
+                    other break statement and the outer loop condition.
+                otherwise it was already explored so you don't add it to the queue
+    thus when the while ends, it will have succeeded with goalReached = 1 and the curr 
+    state equal to the goal.
+    print the number of moves by looking up current in numMoves
+    then iterate through the previous states to create the list of moves that it took
+    to find the goal. You have to reverse this list to get the order the moves were 
+    taken in, and then it prints these out.
+
+    after all the functions is the section to interpret the text commands
+    so for every command, if the text of that command contains the command words,
+    we can interact with it in accordance with what the command should do.
+    setState
+        removes the command word, all spaces, and replaces the b with 0
+        so that calling tuple(command), will give us the correct tuple of the state
+    move
+        manipulates the command to get just the direction, then sets state to 
+        move(state, that direction), which will make the requested move
+    printState just calls printState
+    randomizeState 
+        gets the number n from the command, then for that many times,
+        uses a random number generator to pick a direction, and sets the state to 
+        that moved state as long as the move didn't return -1, but if it did then the 
+        move wasn't valid, so it picks a new random direction so as to stay random but 
+        make sure to make the correct number of random moves to ensure consistency
+    maxNodes
+        gets the number n from the command, and sets the global variable maxNodes to 
+        that value (if not set maxNodes = -1 so that it will never = 0 when decremented
+        in Astar, and thus will never block with algorithm since it should be infinite
+        if not specified)
+    solve A-star
+        gets the specified heuristic (h1 or h2) and calls Astar on the state with that
+        value for h
+    solve beam
+        gets the specified k value and calls beam on the state with that k value 
+    otherwise it contains none of the recognized command words so the program prints
+    that the command is not recognized.
+
+2. Code Correctness
+    A good generic example is trying each search and heuristic with a simple solution, 
+    and then a harder solution. Take these commands for example:
+        setState 1b2 345 678
+        printState
+        solve A-star h1
+        printState
+        solve A-star h2
+        printState
+        solve beam 5
+        randomizeState 30
+        printState
+        solve A-star h1
+        printState
+        solve A-star h2
+        printState
+        solve beam 5
+    These set the state to one move away, and print the state between each algorithm
+    Then it randomizes the state 30 times (with my seed, this sets it to 351 47b 682)
+    and solves it again with each.
+    This shows that each finds the first solution in one move, and the second in the 
+    same 9 moves. While this doesn't prove it is optimal, I also tried each by hand
+    to make sure, and those are the optimal solutions. Others will also work, I 
+    just found those two examples to be good.
+    One example that will fail is when maxNodes is too small for Astar to find the 
+    solution in that many nodes. For example, when you use the above commands but set
+    maxNodes to 5, both Astar heuristics will fail on the second state.
+    h1 requires more nodes to be searched, and as such for example it will fail 
+    if you set maxNodes to 15 in the second state, but h2 will not fail.
+
+
+
+
+
+
+
+
 
 
 maxNodes 18
