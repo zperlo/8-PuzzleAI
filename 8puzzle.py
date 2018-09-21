@@ -1,4 +1,4 @@
-# Zach Perlo
+# Zach Perlo (zip5)
 import sys
 from random import randint
 from random import seed
@@ -116,7 +116,9 @@ def Astar(st, h):
     moveList = {}
     moveList[st] = "Start"
     curr = None
+    #numStates = 0    #only for experiments
     while not prio.empty():
+        #numStates = numStates + 1
         if n == 0:
             break
         n = n - 1
@@ -142,6 +144,7 @@ def Astar(st, h):
         print("Node limit reached, did not find goal")
     else:
         print("Number of moves: " + str(numMoves[curr]))
+        #print("Number of states: " + str(numStates))
         print("Moves:")
         m = moveList[curr]
         moves = []
@@ -168,6 +171,7 @@ def beam(st, k):
     moveList = {}
     moveList[st] = "Start"
     curr = None
+    #numStates = 0  #only for experiments
     while goalReached == 0:
         j = 0
         kStates = []
@@ -177,6 +181,7 @@ def beam(st, k):
             kStates.insert(j, tempState)
             j = j + 1
         for myState in kStates:
+            #numStates = numStates + 1
             if goalReached == 1:
                 break
             aMoves = availableMoves(myState)
@@ -194,6 +199,7 @@ def beam(st, k):
                         curr = newMove
                         break
     print("Number of moves: " + str(numMoves[curr]))
+    #print("Number of states: " + str(numStates))
     print("Moves:")
     m = moveList[curr]
     moves = []
@@ -257,5 +263,32 @@ for command in allLines:
         command = command.replace("\n", "")
         k = int(command)
         beam(state, k)
+    elif "test" in command:
+        command = command.replace("test", "")
+        command = command.replace(" ", "")
+        command = command.replace("\n", "")
+        n = int(command)
+        for z in range(n):
+            x = randint(1,3)
+            print("randomize times: " + str(x))
+            for i in range(x):
+                k = -1
+                while k == -1:
+                    j = randint(1,4)
+                    if j == 1:
+                        direction = "up"
+                    elif j == 2:
+                        direction = "down"
+                    elif j == 3:
+                        direction = "left"
+                    else:
+                        direction = "right"
+                    k = move(state, direction)
+                state = k
+                print(str(state))
+            Astar(state, "h1")
+            Astar(state, "h2")
+            beam(state, 5)
+            beam(state, 10)
     else:
         print("Invalid command:" + command)

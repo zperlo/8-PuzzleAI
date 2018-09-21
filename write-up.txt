@@ -1,4 +1,4 @@
-Zach Perlo
+Zach Perlo (zip5)
 
 1. Code design:
     As is likely obvious, I chose to write in python. I made the decision to store the state
@@ -161,6 +161,9 @@ Zach Perlo
         value for h
     solve beam
         gets the specified k value and calls beam on the state with that k value 
+    test is a command I wrote to do the experiments. It randomizes the state with a new
+    random number each time it is run and runs Astar with h1 and h2, and also runs 
+    beam with both k=5 and k=10
     otherwise it contains none of the recognized command words so the program prints
     that the command is not recognized.
 
@@ -194,20 +197,62 @@ Zach Perlo
     h1 requires more nodes to be searched, and as such for example it will fail 
     if you set maxNodes to 15 in the second state, but h2 will not fail.
 
+3. Experiments
+    This was done with maxNodes = 18400, the -- corresponds to an unfound answer
+    Seach cost (states explored)
+    depth of solution:   A*(h1)    A*(h2)    beam (k=5)  beam (k=10)  
+    2                    3         3         3           3            
+    3                    4         4         6           6     
+    4                    5         5         9           9      
+    7                    12        8         26          41           
+    13                   134       40        326!        101         
+    16                   409       84        69          127   
+    16                   457       55        72          133           
+    20                   2459      676       89          167    
+    22                   5253      368       109*        187          
+    22                   5387      397       149*        207^         
+    24                   12416     611       234$        257#                    
+    24                   16137     1772      372@        503&         
+    26                   --        1632      152         573%   
 
+    ! found the solution at depth 51, which is not optimal
+    * found the solution at depth 24, which is not optimal
+    ^ found the solution at depth 24, which is not optimal
+    $ found the solution at depth 38, which is not optimal
+    # found the solution at depth 26, which is not optimal
+    % found the solution at depth 60, which is not optimal
+    @ found the solution at depth 48, which is not optimal
+    & found the solution at depth 46, which is not optimal
 
+    a) As maxNodes increases, the number of solvable puzzles increases. But, 
+        especially for h1, the additional number of solvable puzzles per extra
+        maxNode gets smaller and smaller. For example, if maxNodes is 3, inrceasing
+        it by 1000 will make it able to solve many many more puzzles, but when you 
+        have maxNodes = 18000, increasing it by 1000 will add only a few extra 
+        puzzles that you can solve as the puzzles take increasinly higher numbers 
+        of states to solve.
+    b) h2 is much better. It always finds the optimal solution in equal or fewer
+        states as h1.
+    c) Solution length for A* starts out the same for both heuristics, but grows
+        very quickly for h1, and less quickly for h2. Both beam sorts have values 
+        that are similar to A* in the very simple puzzles, but they grow faster than
+        those of A* for a bit, but then grow much slower than either A*. For harder 
+        puzzles, beam search is much faster, but also is more unreliable. Very often
+        it would find a solution that was not optimal, though it did reach a goal 
+        state before A* did.
+    d) With the high node limit I set, 100% of my problems were solveable with A* and h2
+        and 12/13 were solvable with A* and h1. For beam, all problems had a solution,
+        but k=5 had only 8/13 optimal solutions, and k=10 had only 9/13.
 
-
-
-
-
-
-
-maxNodes 18
-randomizeState 30
-printState
-solve A-star h1
-printState
-solve A-star h2
-
-h1 fails but h2 doesn't (h2 fails at maxNodes = 9, much better)
+4. Discussion
+    a) I think that A* with heuristic h2 is the best for this problem. It finds the 
+        shortest solutions, and doesn't take much more time than beam, while taking
+        much less time at higher values than h1. Beam is superior in space, as it 
+        only stores a fixed number of states at a time. Beam is also generally 
+        faster than either A*, but since it doesn't always find the optimal solution,
+        it is still not the best algorithm for this problem.
+    b) The main algorithms weren't too bad. The harder part for me was figuring out which 
+        data structures I needed to be able to backtrace a solution when it was found.
+        Also, I spent way too many hours trying to figure out why the algorthms weren't
+        working as they should, and it turned out it was because I had been confused by 
+        the Python Priority Queue API and was using it incorrectly without knowing.
