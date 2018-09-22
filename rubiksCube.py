@@ -10,55 +10,66 @@ myInput = open(inputFile, 'r')
 allLines = myInput.readlines()  #reads each line to an array
 
 # setting global variables and the random seed
-state = ('0', '1', '2', '3', '4', '5', '6', '7', '8')
-goal = ('0', '1', '2', '3', '4', '5', '6', '7', '8')
+state = ('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23')
+goal = ('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23')
 maxNodes = -1
 seed(98765)
 
-# function to move in a given direction
+# function to rotate in a given direction
+# instead of moving just one tile we have to rotate multiple cubies
 def move(st, direction):
-    x = st.index('0')
-    if direction == "up":
-        if x < 3:
-            return -1
-        else:
-            temp = list(st)
-            temp[x],temp[x-3] = temp[x-3],temp[x]
-            new = tuple(temp)
-            return new
-    elif direction == "down":
-        if x > 5:
-            return -1
-        else:
-            temp = list(st)
-            temp[x],temp[x+3] = temp[x+3],temp[x]
-            new = tuple(temp)
-            return new
-    elif direction == "left":
-        if x == 0 or x == 3 or x == 6:
-            return -1
-        else:
-            temp = list(st)
-            temp[x],temp[x-1] = temp[x-1],temp[x]
-            new = tuple(temp)
-            return new
-    elif direction == "right":
-        if x == 2 or x == 5 or x == 8:
-            return -1
-        else:
-            temp = list(st)
-            temp[x],temp[x+1] = temp[x+1],temp[x]
-            new = tuple(temp)
-            return new
-    else:
-        return -1
+    if direction == "F": # rotate front face clockwise
+        F = ('6','7','8','0','1','2','9','10','11','3','4','5','12','13','14','15','16','17','18','19','20','21','22','23')
+        temp = []
+        for i in F:
+            temp.append(st[int(i)])
+        new = tuple(temp)
+        return new
+    elif direction == "F!": # rotate front face counterclockwise
+        F1 = ('3','4','5','9','10','11','0','1','2','6','7','8','12','13','14','15','16','17','18','19','20','21','22','23')
+        temp = []
+        for i in F1:
+            temp.append(st[int(i)])
+        new = tuple(temp)
+        return new
+    elif direction == "L": # rotate left face clockwise
+        L = ('13','14','12','3','4','5','2','0','1','9','10','11','20','18','19','15','16','17','7','8','6','21','22','23')
+        temp = []
+        for i in L:
+            temp.append(st[int(i)])
+        new = tuple(temp)
+        return new
+    elif direction == "L!": # rotate left face counterclockwise
+        L1 = ('7','8','6','3','4','5','20','18','19','9','10','11','2','0','1','15','16','17','13','14','12','21','22','23')
+        temp = []
+        for i in L1:
+            temp.append(st[int(i)])
+        new = tuple(temp)
+        return new
+    elif direction == "U": # rotate upper face clockwise
+        U = ('5','3','4','16','17','15','6','7','8','9','10','11','1','2','0','14','12','13','18','19','20','21','22','23')
+        temp = []
+        for i in U:
+            temp.append(st[int(i)])
+        new = tuple(temp)
+        return new
+    elif direction == "U!": # rotate upper face counterclockwise
+        U1 = ('14','12','13','1','2','0','6','7','8','9','10','11','16','17','15','5','3','4','18','19','20','21','22','23')
+        temp = []
+        for i in U1:
+            temp.append(st[int(i)])
+        new = tuple(temp)
+        return new
 
 # function to print the state
 def printState():
-    strState = "".join(state)
-    strState = strState[:3] + " " + strState[3:6] + " " + strState[6:]
-    strState = strState.replace("0", "b")
-    print(strState)
+    colorArr = ['r','g','w','r','w','b','r','y','g','r','b','y','o','w','g','o','b','w','o','g','y','o','y','b']
+    print("front: " + colorArr[int(state[0])] + ", " + colorArr[int(state[3])] + ", " + colorArr[int(state[6])] + ", " + colorArr[int(state[9])])
+    print("left: " + colorArr[int(state[14])] + ", " + colorArr[int(state[1])] + ", " + colorArr[int(state[19])] + ", " + colorArr[int(state[8])])
+    print("right: " + colorArr[int(state[5])] + ", " + colorArr[int(state[16])] + ", " + colorArr[int(state[10])] + ", " + colorArr[int(state[23])])
+    print("up: " + colorArr[int(state[13])] + ", " + colorArr[int(state[17])] + ", " + colorArr[int(state[2])] + ", " + colorArr[int(state[4])])
+    print("back: " + colorArr[int(state[15])] + ", " + colorArr[int(state[12])] + ", " + colorArr[int(state[21])] + ", " + colorArr[int(state[18])])
+    print("down: " + colorArr[int(state[7])] + ", " + colorArr[int(state[11])] + ", " + colorArr[int(state[20])] + ", " + colorArr[int(state[22])])
 
 # function to get the manhattan didstance, ie h2
 def goalDist(st):
@@ -77,25 +88,14 @@ def goalDist(st):
 def numWrong(st):
     count = 0
     for x in st:
-        if int(x) != st.index(x) and int(x) != 0:
+        if int(x) != st.index(x):
             count = count + 1
-    return count
+    return count/3 # since each cubie is 3 numbers in the state
 
 # function to get all available moves from the given state and return them
+# changed as the cube always has all 6 moves available
 def availableMoves(st):
-    aMoves = []
-    u = move(st, "up")
-    if u != -1:
-        aMoves.append("up")
-    d = move(st, "down")
-    if d != -1:
-        aMoves.append("down")
-    l = move(st, "left")
-    if l != -1:
-        aMoves.append("left")
-    r = move(st, "right")
-    if r != -1:
-        aMoves.append("right")
+    aMoves = ["F","F!","L","L!","U","U!"]
     return aMoves
 
 # function to solve via A* with given start state and heuristic
@@ -214,11 +214,10 @@ def beam(st, k):
 
 # section for interpreting all the text file commands
 for command in allLines:
-    if "setState" in command:
+    if "setState" in command: #setState won't work reasonably as some indexes are 2-digit
         command = command.replace(" ", "")
         command = command.replace("\n", "")
         command = command.replace("setState", "")
-        command = command.replace("b", "0")
         state = tuple(command)
     elif "move" in command:
         command = command.replace(" ", "")
@@ -227,25 +226,16 @@ for command in allLines:
         state = move(state, command)
     elif "printState" in command:
         printState()
-    elif "randomizeState" in command:
+    elif "randomizeState" in command:  # much easier since there are no invalid moves
         command = command.replace(" ", "")
         command = command.replace("\n", "")
         command = command.replace("randomizeState", "")
         n = int(command)
         for i in range(n):
-            k = -1
-            while k == -1:
-                j = randint(1,4)
-                if j == 1:
-                    direction = "up"
-                elif j == 2:
-                    direction = "down"
-                elif j == 3:
-                    direction = "left"
-                else:
-                    direction = "right"
-                k = move(state, direction)
-            state = k
+            moveArr = ["F","F!","L","L!","U","U!"]
+            j = randint(0,5)
+            print(moveArr[j])
+            state = move(state, moveArr[j])
     elif "maxNodes" in command:
         command = command.replace(" ", "")
         command = command.replace("\n", "")
@@ -263,32 +253,5 @@ for command in allLines:
         command = command.replace("\n", "")
         k = int(command)
         beam(state, k)
-    elif "test" in command:
-        command = command.replace("test", "")
-        command = command.replace(" ", "")
-        command = command.replace("\n", "")
-        n = int(command)
-        for z in range(n):
-            x = randint(1,3)
-            print("randomize times: " + str(x))
-            for i in range(x):
-                k = -1
-                while k == -1:
-                    j = randint(1,4)
-                    if j == 1:
-                        direction = "up"
-                    elif j == 2:
-                        direction = "down"
-                    elif j == 3:
-                        direction = "left"
-                    else:
-                        direction = "right"
-                    k = move(state, direction)
-                state = k
-                print(str(state))
-            Astar(state, "h1")
-            Astar(state, "h2")
-            beam(state, 5)
-            beam(state, 10)
     else:
         print("Invalid command:" + command)

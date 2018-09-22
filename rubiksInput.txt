@@ -1,0 +1,6 @@
+printState
+move F
+printState
+randomizeState 12
+solve A-star h1
+solve beam 10
