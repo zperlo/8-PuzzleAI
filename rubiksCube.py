@@ -74,14 +74,6 @@ def printState():
 # function to get the manhattan didstance, ie h2
 def goalDist(st):
     count = 0
-    for x in st:
-        if int(x) != 0:
-            if (int(x) < 3 and st.index(x) < 3) or (int(x) >= 3 and int(x) < 6 and st.index(x) >= 3 and st.index(x) < 6) or (int(x) >= 6 and st.index(x) >= 6):
-                count = count + abs((int(x) % 3) - (st.index(x)%3))
-            elif (int(x) < 3 and st.index(x) >= 3 and st.index(x) < 6) or (int(x) >= 3 and int(x) < 6 and (st.index(x) < 3 or st.index(x) >= 6)) or (int(x) >= 6 and st.index(x) < 6 and st.index(x) >= 3):
-                count = count + abs((int(x) % 3) - (st.index(x)%3)) + 1
-            else:
-                count = count + abs((int(x) % 3) - (st.index(x)%3)) + 2
     return count
 
 # function to get the linear distance, ie h1
@@ -90,7 +82,8 @@ def numWrong(st):
     for x in st:
         if int(x) != st.index(x):
             count = count + 1
-    return count/3 # since each cubie is 3 numbers in the state
+    return count/12 # since each cubie is 3 numbers in the state and you can move 4 cubies at once
+                    # same as saying count/3 faces /4 cubies
 
 # function to get all available moves from the given state and return them
 # changed as the cube always has all 6 moves available
@@ -116,9 +109,9 @@ def Astar(st, h):
     moveList = {}
     moveList[st] = "Start"
     curr = None
-    #numStates = 0    #only for experiments
+    numStates = 0    #only for experiments
     while not prio.empty():
-        #numStates = numStates + 1
+        numStates = numStates + 1
         if n == 0:
             break
         n = n - 1
@@ -144,7 +137,7 @@ def Astar(st, h):
         print("Node limit reached, did not find goal")
     else:
         print("Number of moves: " + str(numMoves[curr]))
-        #print("Number of states: " + str(numStates))
+        print("Number of states: " + str(numStates))
         print("Moves:")
         m = moveList[curr]
         moves = []
@@ -171,7 +164,7 @@ def beam(st, k):
     moveList = {}
     moveList[st] = "Start"
     curr = None
-    #numStates = 0  #only for experiments
+    numStates = 0  #only for experiments
     while goalReached == 0:
         j = 0
         kStates = []
@@ -181,7 +174,7 @@ def beam(st, k):
             kStates.insert(j, tempState)
             j = j + 1
         for myState in kStates:
-            #numStates = numStates + 1
+            numStates = numStates + 1
             if goalReached == 1:
                 break
             aMoves = availableMoves(myState)
@@ -199,7 +192,7 @@ def beam(st, k):
                         curr = newMove
                         break
     print("Number of moves: " + str(numMoves[curr]))
-    #print("Number of states: " + str(numStates))
+    print("Number of states: " + str(numStates))
     print("Moves:")
     m = moveList[curr]
     moves = []
@@ -214,10 +207,10 @@ def beam(st, k):
 
 # section for interpreting all the text file commands
 for command in allLines:
-    if "setState" in command: #setState won't work reasonably as some indexes are 2-digit
-        command = command.replace(" ", "")
+    if "setState" in command:
         command = command.replace("\n", "")
-        command = command.replace("setState", "")
+        command = command.replace("setState ", "")
+        command = [i for i in command.split()]
         state = tuple(command)
     elif "move" in command:
         command = command.replace(" ", "")
@@ -234,7 +227,7 @@ for command in allLines:
         for i in range(n):
             moveArr = ["F","F!","L","L!","U","U!"]
             j = randint(0,5)
-            print(moveArr[j])
+            #print(moveArr[j])  #used to check correctness of solutions
             state = move(state, moveArr[j])
     elif "maxNodes" in command:
         command = command.replace(" ", "")

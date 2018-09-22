@@ -1,0 +1,150 @@
+Zach Perlo (zip5)
+
+Much of this will be less informative as the normal write-up, as I was able to re-use
+a good amount of code, so I won't go into as much detail.
+
+1. Code design:
+    Again I made the decision to store the state as a tuple.
+    For example, the goal state is represented as
+    goal = ('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14',
+    '15','16','17','18','19','20','21','22','23')
+
+    The reason it has 24 items is that the 2x2 rubiks cube has 24 faces. Each face
+    is part of a "cubie". There are 8 cubies and each has 3 faces (the other 3 are inside
+    the rubiks cube so don't matter). So while the list is 24 elements, every set of 3
+    has to stay together or the configuration is impossible because you can't break 
+    apart a cubie.
+
+    move function. This takes in a state and a direction and returns the state 
+    with the requested move. Again, tuples are immutable so it returns a second state, 
+    not the input state changed. This is helpful later on. This is one of the bigger changes.
+    the way this works is I went through the numbered indexes and figured out which 
+    face would be where when each rotation was performed (I have a 2x2 cube so I used 
+    tape and a marker to mark the faces, which made this step much easier). Then I go 
+    through every element and alter where it is based on where they should be with each 
+    turn of the cube. The way I did it allows it to rotate no matter which values of the 
+    cube are where.
+
+    printState takes in a state and prints it. This is very different as printing out 
+    the list is fairly useless as it's very hard to tell what color is where from 24 numbers.
+    I knew where each face was from when I wrote move, so based on the standard colors I
+    had it print out each cube face with what color each face is on it. So the standard 
+    front face is all red, so in the goal state, it would print front: r, r, r, r to 
+    show that all four are red. It goes in order of top left, top right, bottom left, 
+    bottom right.
+
+    goalDist is wrong for the cube. I could not find a way to accurately describe the 
+    Manhattan distance for a rubiks cube, as I don't know enough about them to know how 
+    many turns you need to fix a given face and calculating that with the way I set things
+    up would be excessively complicated.
+
+    numWrong takes a state as input and returns the linear distance of that state from the 
+    goal. It does this by going through and for each element it checks if it is in the correct
+    position or not, and adds 1 for each element that is not in the correct position. This 
+    is the h1 heuristic from the book. For the rubiks cube you also need to divide the count 
+    by 12, because each turn moves 4 cubies, and each cubie has 3 faces. So in order for it 
+    to be admissible you must divide by 12.
+
+    availableMoves is very easy for the cube as all 6 turns are always available. I could
+    have just removed this function but I wanted to leave Astar and beam unchanged, so I 
+    instead just have it return an array with all the possible moves.
+
+    Astar is unchanged.
+
+    beam is also unchanged.
+
+    after all the functions is the section to interpret the text commands
+    so for every command, if the text of that command contains the command words,
+    we can interact with it in accordance with what the command should do.
+    setState
+        similar to before, it's a little unweildy becuase the input needs to be the 24 numbers
+        separated by spaces, like this:
+        setState 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+    move
+        manipulates the command to get just the direction, then sets state to 
+        move(state, that direction), which will make the requested move
+    printState just calls printState
+    randomizeState 
+        gets the number n from the command, then for that many times,
+        uses a random number generator to pick a direction, and sets the state to 
+        that moved state
+    maxNodes
+        gets the number n from the command, and sets the global variable maxNodes to 
+        that value (if not set maxNodes = -1 so that it will never = 0 when decremented
+        in Astar, and thus will never block with algorithm since it should be infinite
+        if not specified)
+    solve A-star
+        gets the specified heuristic (h1 or h2) and calls Astar on the state with that
+        value for h
+    solve beam
+        gets the specified k value and calls beam on the state with that k value 
+    otherwise it contains none of the recognized command words so the program prints
+    that the command is not recognized.
+
+2. Code Correctness
+    A good generic example is trying each search with a simple solution, 
+    and then a harder solution. Take these commands for example:
+        setState 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+        randomizeState 1
+        solve A-star h1
+        solve beam 10
+        setState 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+        randomizeState 4
+        solve A-star h1
+        solve beam 10
+        setState 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+        randomizeState 7
+        solve A-star h1
+        solve beam 10
+    This shows that each finds the first solution in one move, and the second in the 
+    same 2 moves (it undoes one of its own moves in the randomization). The third is
+    solved in 5 by Astar, and sometimes beam solves it fast,other times it solves 
+    it very very slowly.
+    While this doesn't prove it is optimal, I also tried each by hand
+    to make sure, and those are the optimal solutions. Others will also work, I 
+    just found those two examples to be good.
+    One example that will fail is when maxNodes is too small for Astar to find the 
+    solution in that many nodes, or with numbers greater than 5 for beam where it 
+    is unpredictable.
+
+3. Experiments
+    This was done with maxNodes = 18400, the -- corresponds to an unfound answer
+    Nowhere near as many states were solveable, which makes sense given that the state 
+    space is much larger for the rubiks cube than the 8-puzzle.
+    Seach cost (states explored)
+    depth of solution:   A*(h1)         beam (k=10)  
+    1                    2                 1           
+    2                    4                 2     
+    5                    158               380579*81     
+    7                    2963              50   
+    8                    11994             -- (takes too long)        
+    
+
+    a) As maxNodes increases, the number of solvable puzzles increases. But, 
+        as with the 8 puzzle, the additional number of solvable puzzles per extra
+        maxNode gets smaller and smaller.
+    b) h2 would likely be better if I could figure out how to do it.
+    c) Solution length for A* starts out the same for both heuristics, but grows
+        very quickly for h1, and is very inconsistent with beam. Becuase the search space
+        is much more complicated but its evaluation function isn't, it is easier to 
+        essentially get trapped or at least stuck for a bit in a worse area. As such, 
+        with very low numbers, beam finds the solution just as easily at A*, but once
+        you get even to a solution depth of 5, it can get trapped for very long. 
+        (Though I did have it solve it very quickly one of the many times I ran it on that
+        5 depth one, just like the example of the 7 depth that it found very fast).
+    d) With no node limit, up through a solution depth of 8 was solveable for A*, but 
+        everything further took too long to solve. Beam was inconsistent, but 7 depth 
+        was the big limit.
+
+4. Discussion
+    a) I think that A* is better for this problem. While it takes too long very quickly,
+        it solves more puzzles more consistently than beam does. Beam usually takes about 
+        the same length or longer to solve each level, though sometimes is much much longer
+        or shorter.
+    b) The main algorithms were the same from the 8-puzzle. I could not implement the h2
+        heuristic as I couldn't figure out how it would map to my representation of the 
+        cube, given how I stored information by faces and I don't know that much about
+        rubiks cubes. That was the main difficulty, other than that, figuring out how 
+        the rotations would work was difficult, but having the physical cube helped. I 
+        wish I could have done more testing, but both algorithms so easily ran out of 
+        memory/took way too long that it was impossible.
