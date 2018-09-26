@@ -1,5 +1,7 @@
 Zach Perlo (zip5)
 
+run with: python3 8puzzle.py input.txt
+
 1. Code design:
     As is likely obvious, I chose to write in python. I made the decision to store the state
     as a tuple. Originally I was storing it as a list, but I wanted to use states as the 
@@ -87,6 +89,12 @@ Zach Perlo (zip5)
         then iterate through the previous states to create the list of moves that it took
         to find the goal. You have to reverse this list to get the order the moves were 
         taken in, and then it prints these out.
+    Each state is 120 bytes (all this is tested with sys.getsizeof()). Each dictionary
+    starts at 240 bytes and increases in size with number of nodes. The priority queue 
+    starts at 53 bytes, and increases in size with number of nodes. So Astar at base will
+    use 240+240+240+53+120 (for goal) = 893 bytes of memory. This could be done with a 
+    good bit less memory if I didn't need to track the path, but it's not too much memory
+    overall, and still allows modern computers to compute the solutions.
 
     beam takes in an initial state and a k value (how many states to store at once) and 
     prints out the number of moves it took to find a solution and a list of what direction 
@@ -134,6 +142,12 @@ Zach Perlo (zip5)
     then iterate through the previous states to create the list of moves that it took
     to find the goal. You have to reverse this list to get the order the moves were 
     taken in, and then it prints these out.
+    Each state is 120 bytes (all this is tested with sys.getsizeof()). Each dictionary
+    starts at 240 bytes and increases in size with number of nodes. The priority queue 
+    starts at 53 bytes, and increases in size with number of nodes. So beam at base will
+    use 240+240+240+53+120 (for goal) = 893 bytes of memory (same as Astar). This could 
+    be done with a good bit less memory if I didn't need to track the path, but it's not 
+    too much memory overall, and still allows modern computers to compute the solutions.
 
     after all the functions is the section to interpret the text commands
     so for every command, if the text of that command contains the command words,

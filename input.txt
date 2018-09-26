@@ -13,4 +13,3 @@ printState
 solve A-star h2
 printState
 solve beam 5
-setState b12 345 678

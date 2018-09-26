@@ -1,5 +1,7 @@
 Zach Perlo (zip5)
 
+run with: python3 rubiksCube.py rubiksInput.txt
+
 Much of this will be less informative as the normal write-up, as I was able to re-use
 a good amount of code, so I won't go into as much detail.
 

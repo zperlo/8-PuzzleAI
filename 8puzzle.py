@@ -214,22 +214,21 @@ def beam(st, k):
 
 # section for interpreting all the text file commands
 for command in allLines:
+    command = command.replace("\n", "")
+    print(command)
     if "setState" in command:
         command = command.replace(" ", "")
-        command = command.replace("\n", "")
         command = command.replace("setState", "")
         command = command.replace("b", "0")
         state = tuple(command)
     elif "move" in command:
         command = command.replace(" ", "")
-        command = command.replace("\n", "")
         command = command.replace("move", "")
         state = move(state, command)
     elif "printState" in command:
         printState()
     elif "randomizeState" in command:
         command = command.replace(" ", "")
-        command = command.replace("\n", "")
         command = command.replace("randomizeState", "")
         n = int(command)
         for i in range(n):
@@ -248,25 +247,21 @@ for command in allLines:
             state = k
     elif "maxNodes" in command:
         command = command.replace(" ", "")
-        command = command.replace("\n", "")
         command = command.replace("maxNodes", "")
         n = int(command)
         maxNodes = n
     elif "solve A-star" in command:
         command = command.replace("solve A-star", "")
         command = command.replace(" ", "")
-        command = command.replace("\n", "")
         Astar(state, command)
     elif "solve beam" in command:
         command = command.replace("solve beam", "")
         command = command.replace(" ", "")
-        command = command.replace("\n", "")
         k = int(command)
         beam(state, k)
     elif "test" in command:
         command = command.replace("test", "")
         command = command.replace(" ", "")
-        command = command.replace("\n", "")
         n = int(command)
         for z in range(n):
             x = randint(1,3)
